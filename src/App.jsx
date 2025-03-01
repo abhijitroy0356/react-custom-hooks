@@ -1,20 +1,31 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, memo } from 'react'
 import './App.css'
 import axios from 'axios'
-function App() {
- const [todos, setTodos] = useState([])
 
+function useTodos(n){
+  const [todos, setTodos]= useState([])
+  const [loading, setLoading]= useState(true)
+  
   useEffect(()=>{
+    setInterval(() => {
     axios.get('https://dummyjson.com/todos')
       .then(res=>{
-          setTodos(res.data.todos)
-          console.log(res.data.todos)
+        setLoading(false) 
+        setTodos(res.data.todos)
       })
       .catch(err => console.error(err))
-  },[])
+    }, n*1000)
+  },[n])
+
+
+  return {todos,loading};
+}
+function App() {
+ const {todos, loading} = useTodos(3)
   return (
     <>
-    {todos.map((mp)=>{
+
+    {loading ? "Loading...........":todos.map((mp)=>{
       return <Track key={mp.id} todo={mp}/>
     })}
     
@@ -23,13 +34,13 @@ function App() {
 }
 
 
-function Track({todo}){
+const Track = memo(({ todo }) => {
   return (
     <div>
-     <div>{todo.todo}</div>
-    <button>{todo.completed ? 'Done' : 'not Done'}</button>
-    <br />
+      <div>{todo.todo}</div>
+      <button>{todo.completed ? 'Done' : 'Not Done'}</button>
+      <br />
     </div>
-  )
-}
+  );
+});
 export default App
